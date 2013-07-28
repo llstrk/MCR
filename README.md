@@ -1,0 +1,4 @@
+MCR
+===
+
+Magic Card recognition
