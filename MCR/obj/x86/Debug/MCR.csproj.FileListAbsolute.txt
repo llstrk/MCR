@@ -1,0 +1,17 @@
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\MCR.exe
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\MCR.pdb
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\AForge.dll
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\AForge.Imaging.dll
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\AForge.Math.dll
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\AForge.xml
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\AForge.Imaging.xml
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\AForge.Math.xml
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\obj\x86\Debug\MCR.csprojResolveAssemblyReference.cache
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\obj\x86\Debug\MCR.Form1.resources
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\obj\x86\Debug\MCR.Properties.Resources.resources
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\obj\x86\Debug\MCR.csproj.GenerateResource.Cache
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\obj\x86\Debug\MCR.exe
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\obj\x86\Debug\MCR.pdb
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\test.jpg
+C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\test2.jpg
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\test3.jpg
