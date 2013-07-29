@@ -120,7 +120,7 @@
             this.txtFilename.Name = "txtFilename";
             this.txtFilename.Size = new System.Drawing.Size(220, 20);
             this.txtFilename.TabIndex = 8;
-            this.txtFilename.Text = "test8.jpg";
+            this.txtFilename.Text = "test10.jpg";
             // 
             // txtThreshold
             // 
