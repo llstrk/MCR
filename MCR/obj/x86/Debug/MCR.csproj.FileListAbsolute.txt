@@ -19,3 +19,4 @@ C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\jpeg62.d
 C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\libpng12.dll
 C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\pHash.dll
 C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\zlib1.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\m14hashes.txt

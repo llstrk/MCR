@@ -11,6 +11,9 @@ using AForge.Imaging;
 using AForge.Imaging.Filters;
 using AForge.Math.Geometry;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using System.Net;
+using System.IO;
 
 namespace MCR
 {
@@ -33,28 +36,11 @@ namespace MCR
         Bitmap filtered;
         Bitmap bm;
 
-        string[] cards = {
-                             /*"test1|13750474910647469295",
-                             "test2|13750476009085355247",
-                             "test3|16030924904119739644",
-                             "test4|7929443744867293693",
-                             "test5|16030643429143028990",
-                             "test6|15659946806948991704",
-                             "test8|15801795407763621593"
-                             "test10|13707067496396514558"*/
-                             "ref1|18336485338845046014",
-                             "ref2|15805749251576959705"
-                         };
+        string[] m14hashes = File.ReadAllLines(@"m14hashes.txt");
 
-        private void button1_Click(object sender, EventArgs e)
+        private List<IntPoint> DetectQuad(Bitmap sourceBitmap)
         {
-            picTopBar.Image = null;
-            picTypeBar.Image = null;
-            picArt.Image = null;
-            picFull.Image = null;
-
-            Bitmap bitmap = new Bitmap(txtFilename.Text);
-            filtered = Grayscale.CommonAlgorithms.BT709.Apply(bitmap);
+            filtered = Grayscale.CommonAlgorithms.BT709.Apply(sourceBitmap);
             BlobCounter bc = new BlobCounter();
 
             SobelEdgeDetector edgeFilter = new SobelEdgeDetector();
@@ -73,7 +59,7 @@ namespace MCR
             g = Graphics.FromImage(bm);
             g.DrawImage(filtered, 0, 0, filtered.Width, filtered.Height);
             pictureBox1.Image = bm;
-            picOrg.Image = bitmap;
+            picOrg.Image = sourceBitmap;
 
             for (int i = 0; i < blobs.Length; i++)
             {
@@ -92,7 +78,7 @@ namespace MCR
                             float chkWidth = corners[0].DistanceTo(corners[1]);
                             float chkHeight = corners[1].DistanceTo(corners[2]);
                             float areal = chkWidth * chkHeight;
-                            
+
                             // Hack to avoid small blobs inside the card
                             if (areal < 1000)
                             {
@@ -106,70 +92,85 @@ namespace MCR
                                 corners.RemoveAt(0);
                             }
 
-                            QuadrilateralTransformation quad = new QuadrilateralTransformation(corners, 241, 346);
-                            Bitmap full = quad.Apply(bitmap);
-
-                            List<IntPoint> pointsTopBar = new List<IntPoint>();
-                            pointsTopBar.Add(new IntPoint(10, 10));
-                            pointsTopBar.Add(new IntPoint(230, 10));
-                            pointsTopBar.Add(new IntPoint(230, 25));
-                            pointsTopBar.Add(new IntPoint(10, 25));
-
-                            QuadrilateralTransformation quadTopBar = new QuadrilateralTransformation(pointsTopBar, 220, 16);
-                            Bitmap topBar = quadTopBar.Apply(full);
-
-                            List<IntPoint> pointsTypeBar = new List<IntPoint>();
-                            pointsTypeBar.Add(new IntPoint(10, 198));
-                            pointsTypeBar.Add(new IntPoint(230, 198));
-                            pointsTypeBar.Add(new IntPoint(230, 213));
-                            pointsTypeBar.Add(new IntPoint(10, 213));
-
-                            QuadrilateralTransformation quadTypeBar = new QuadrilateralTransformation(pointsTypeBar, 220, 16);
-                            Bitmap typeBar = quadTypeBar.Apply(full);
-
-                            List<IntPoint> pointsArt = new List<IntPoint>();
-                            pointsArt.Add(new IntPoint(10, 31));
-                            pointsArt.Add(new IntPoint(230, 31));
-                            pointsArt.Add(new IntPoint(230, 193));
-                            pointsArt.Add(new IntPoint(10, 193));
-
-                            QuadrilateralTransformation quadArt = new QuadrilateralTransformation(pointsArt, 220, 162);
-                            Bitmap art = quadArt.Apply(full);
-
-                            g.DrawPolygon(pen, ToPointsArray(corners));
-
-                            pictureBox1.Image = bm;
-
-                            picTopBar.Image = topBar;
-                            picTypeBar.Image = typeBar;
-                            picArt.Image = art;
-                            picFull.Image = full;
-                            full.Save("temp.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                            return corners;
                         }
                     }
                 }
             }
+            
+            return null;
+        }
 
+        private Bitmap GetCard(Bitmap sourceBitmap)
+        {
+            List<IntPoint> corners = DetectQuad(sourceBitmap);
+
+            // Hack to show what was detected
+            g.DrawPolygon(pen, ToPointsArray(corners));
+            pictureBox1.Image = bm;
+
+            QuadrilateralTransformation quad = new QuadrilateralTransformation(corners, 241, 346);
+            return  quad.Apply(sourceBitmap);
+        }
+
+        private Bitmap GetCardTopBar(Bitmap cardBitmap)
+        {
+            List<IntPoint> pointsTopBar = new List<IntPoint>();
+            pointsTopBar.Add(new IntPoint(10, 10));
+            pointsTopBar.Add(new IntPoint(230, 10));
+            pointsTopBar.Add(new IntPoint(230, 25));
+            pointsTopBar.Add(new IntPoint(10, 25));
+
+            QuadrilateralTransformation quadTopBar = new QuadrilateralTransformation(pointsTopBar, 220, 16);
+            return quadTopBar.Apply(cardBitmap);
+        }
+
+        private Bitmap GetCardTypeBar(Bitmap cardBitmap)
+        {
+            List<IntPoint> pointsTypeBar = new List<IntPoint>();
+            pointsTypeBar.Add(new IntPoint(10, 198));
+            pointsTypeBar.Add(new IntPoint(230, 198));
+            pointsTypeBar.Add(new IntPoint(230, 213));
+            pointsTypeBar.Add(new IntPoint(10, 213));
+
+            QuadrilateralTransformation quadTypeBar = new QuadrilateralTransformation(pointsTypeBar, 220, 16);
+            return quadTypeBar.Apply(cardBitmap);
+        }
+
+        private Bitmap GetCardArt(Bitmap cardBitmap)
+        {
+            List<IntPoint> pointsArt = new List<IntPoint>();
+            pointsArt.Add(new IntPoint(10, 31));
+            pointsArt.Add(new IntPoint(230, 31));
+            pointsArt.Add(new IntPoint(230, 193));
+            pointsArt.Add(new IntPoint(10, 193));
+
+            QuadrilateralTransformation quadArt = new QuadrilateralTransformation(pointsArt, 220, 162);
+            return quadArt.Apply(cardBitmap);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            picTopBar.Image = null;
+            picTypeBar.Image = null;
+            picArt.Image = null;
+            picFull.Image = null;
+
+            Bitmap full = GetCard(new Bitmap(txtFilename.Text));
+
+            picTopBar.Image = GetCardTopBar(full);
+            picTypeBar.Image = GetCardTypeBar(full);
+            picArt.Image = GetCardArt(full);
+            picFull.Image = full;
+
+            full.Save("temp.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             UInt64 test = Phash.ImageHash("temp.jpg");
 
-            bool _doHash = true;
-            if (txtOutput.Text == "")
-            {
-                _doHash = false;
-            }
-            txtOutput.Text += test + "\r\n";
-
-            if (_doHash)
-            {
-                string[] split = txtOutput.Text.Replace("\r\n", "|").Split("|".ToCharArray());
-                int test2 = Phash.HammingDistance(UInt64.Parse(split[0]), UInt64.Parse(split[1]));
-
-                //txtOutput.Text += test2;
-            }
+            txtOutput.Text += test;
         }
 
         // Conver list of AForge.NET's points to array of .NET points
@@ -224,7 +225,7 @@ namespace MCR
             int _bestMatch = 999;
             string _bestMatchFilename = "";
 
-            foreach (string str in cards)
+            foreach (string str in m14hashes)
             {
                 string[] s = str.Split('|');
 
@@ -233,11 +234,53 @@ namespace MCR
                 if (_result < _bestMatch)
                 {
                     _bestMatch = _result;
-                    _bestMatchFilename = s[0] + ".jpg";
+                    _bestMatchFilename = s[0];
                 }
             }
+            pictureBox1.Image = new Bitmap(_bestMatchFilename);
+            if (_bestMatch > 9)
+            {
+                txtOutput.Text = string.Format("Best match: {0} (crap match)\r\nFilename: {1}", _bestMatch, _bestMatchFilename);
+            }
+            else
+            {
+                txtOutput.Text = string.Format("Best match: {0}\r\nFilename: {1}", _bestMatch, _bestMatchFilename);
+            }
+        }
 
-            txtOutput.Text = string.Format("Best match: {0}\r\nFilename: {1}", _bestMatch, _bestMatchFilename);
+        private void DownloadCards()
+        {
+            Regex regex = new Regex(@"(?<==.)(.*)(?=.jpg.>).jpg");
+            List<string> images = new List<string>();
+
+            WebClient wc = new WebClient();
+            string site = wc.DownloadString("http://mythicspoiler.com/m14/cards/");
+
+            string[] result = site.Split('\n');
+
+            foreach (string r in result)
+            {
+                Match test = regex.Match(r);
+                if (test.Success)
+                {
+                    images.Add(test.Value);
+                    wc.DownloadFile(string.Format("http://mythicspoiler.com/m14/cards/{0}", test.Value), @"C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\temp\" + test.Value);
+                }
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            string[] files = Directory.GetFiles("M14");
+
+            foreach (string f in files)
+            {
+                Bitmap card = GetCard(new Bitmap(f));
+                pictureBox1.Image = card;
+                
+                card.Save("temp.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                txtOutput.Text += f + "|" + Phash.ImageHash("temp.jpg") + "\r\n";
+            }
         }
     }
 }

@@ -93,6 +93,9 @@
     <Content Include="libpng12.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="m14hashes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="pHash.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
