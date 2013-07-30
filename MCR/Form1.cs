@@ -106,11 +106,19 @@ namespace MCR
             List<IntPoint> corners = DetectQuad(sourceBitmap);
 
             // Hack to show what was detected
-            g.DrawPolygon(pen, ToPointsArray(corners));
-            pictureBox1.Image = bm;
+            try
+            {
+                g.DrawPolygon(pen, ToPointsArray(corners));
 
-            QuadrilateralTransformation quad = new QuadrilateralTransformation(corners, 241, 346);
-            return  quad.Apply(sourceBitmap);
+                pictureBox1.Image = bm;
+
+                QuadrilateralTransformation quad = new QuadrilateralTransformation(corners, 241, 346);
+                return quad.Apply(sourceBitmap);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private Bitmap GetCardTopBar(Bitmap cardBitmap)
@@ -158,12 +166,15 @@ namespace MCR
 
             Bitmap full = GetCard(new Bitmap(txtFilename.Text));
 
-            picTopBar.Image = GetCardTopBar(full);
-            picTypeBar.Image = GetCardTypeBar(full);
-            picArt.Image = GetCardArt(full);
-            picFull.Image = full;
+            if (full != null)
+            {
+                picTopBar.Image = GetCardTopBar(full);
+                picTypeBar.Image = GetCardTypeBar(full);
+                picArt.Image = GetCardArt(full);
+                picFull.Image = full;
 
-            full.Save("temp.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                full.Save("temp.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -238,7 +249,11 @@ namespace MCR
                 }
             }
             pictureBox1.Image = new Bitmap(_bestMatchFilename);
-            if (_bestMatch > 9)
+            if (_bestMatch > 9 && _bestMatch < 17)
+            {
+                txtOutput.Text = string.Format("Best match: {0} (shaky match)\r\nFilename: {1}", _bestMatch, _bestMatchFilename);
+            }
+            else if (_bestMatch >= 17)
             {
                 txtOutput.Text = string.Format("Best match: {0} (crap match)\r\nFilename: {1}", _bestMatch, _bestMatchFilename);
             }

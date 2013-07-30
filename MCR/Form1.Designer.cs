@@ -131,7 +131,7 @@
             this.txtThreshold.Name = "txtThreshold";
             this.txtThreshold.Size = new System.Drawing.Size(43, 20);
             this.txtThreshold.TabIndex = 9;
-            this.txtThreshold.Text = "100";
+            this.txtThreshold.Text = "50";
             // 
             // txtOutput
             // 
@@ -153,11 +153,12 @@
             // 
             // button4
             // 
+            this.button4.Enabled = false;
             this.button4.Location = new System.Drawing.Point(1036, 632);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(75, 23);
             this.button4.TabIndex = 12;
-            this.button4.Text = "button4";
+            this.button4.Text = "Build DB";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
