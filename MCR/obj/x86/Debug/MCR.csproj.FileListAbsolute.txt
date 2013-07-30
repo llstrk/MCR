@@ -15,3 +15,7 @@ C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\obj\x86\Debug\MCR.
 C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\test.jpg
 C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\bin\Debug\test2.jpg
 C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\test3.jpg
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\jpeg62.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\libpng12.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\pHash.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\zlib1.dll
