@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Net;
 using System.IO;
+using DirectX.Capture;
 
 namespace MCR
 {
@@ -28,13 +29,45 @@ namespace MCR
         {
             Bitmap bitmap = new Bitmap("test3.jpg");
             pictureBox1.Image = bitmap;
+
+            capture = new DirectX.Capture.Capture(cameraFilters.VideoInputDevices[1], null);
+            capture.FrameSize = new Size(640,480);
+            capture.PreviewWindow = picPreview;
+            capture.FrameEvent2 += capture_FrameEvent2;
+            capture.GrapImg();
+            
         }
 
+        private void capture_FrameEvent2(Bitmap e)
+        {
+            webcamBitmap = (Bitmap)e.Clone();
+
+            //Bitmap full = GetCard(new Bitmap(txtFilename.Text));
+            Bitmap full = GetCard(webcamBitmap);
+
+            if (full != null)
+            {
+                lock (doTempImg)
+                {
+                    try
+                    {
+                        full.Save("temp.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                    }
+                    catch { }
+                    picFull.Image = full;
+                }
+            }
+        }
+
+        object doTempImg = new object();
+        Bitmap webcamBitmap = null;
         Blob[] blobs = null;
         Pen pen = new Pen(Color.Red, 2);
         Graphics g;
         Bitmap filtered;
         Bitmap bm;
+        private DirectX.Capture.Capture capture = null;
+        private Filters cameraFilters = new Filters();
 
         string[] m14hashes = File.ReadAllLines(@"m14hashes.txt");
 
@@ -80,7 +113,7 @@ namespace MCR
                             float areal = chkWidth * chkHeight;
 
                             // Hack to avoid small blobs inside the card
-                            if (areal < 1000)
+                            if (areal < 20000)
                             {
                                 continue;
                             }
@@ -164,7 +197,8 @@ namespace MCR
             picArt.Image = null;
             picFull.Image = null;
 
-            Bitmap full = GetCard(new Bitmap(txtFilename.Text));
+            //Bitmap full = GetCard(new Bitmap(txtFilename.Text));
+            Bitmap full = GetCard(new Bitmap(webcamBitmap));
 
             if (full != null)
             {
@@ -232,34 +266,37 @@ namespace MCR
 
         private void button3_Click(object sender, EventArgs e)
         {
-            UInt64 _card = Phash.ImageHash("temp.jpg");
-            int _bestMatch = 999;
-            string _bestMatchFilename = "";
-
-            foreach (string str in m14hashes)
+            lock (doTempImg)
             {
-                string[] s = str.Split('|');
+                UInt64 _card = Phash.ImageHash("temp.jpg");
+                int _bestMatch = 999;
+                string _bestMatchFilename = "";
 
-                int _result = Phash.HammingDistance(_card, UInt64.Parse(s[1]));
-
-                if (_result < _bestMatch)
+                foreach (string str in m14hashes)
                 {
-                    _bestMatch = _result;
-                    _bestMatchFilename = s[0];
+                    string[] s = str.Split('|');
+
+                    int _result = Phash.HammingDistance(_card, UInt64.Parse(s[1]));
+
+                    if (_result < _bestMatch)
+                    {
+                        _bestMatch = _result;
+                        _bestMatchFilename = s[0];
+                    }
                 }
-            }
-            pictureBox1.Image = new Bitmap(_bestMatchFilename);
-            if (_bestMatch > 9 && _bestMatch < 17)
-            {
-                txtOutput.Text = string.Format("Best match: {0} (shaky match)\r\nFilename: {1}", _bestMatch, _bestMatchFilename);
-            }
-            else if (_bestMatch >= 17)
-            {
-                txtOutput.Text = string.Format("Best match: {0} (crap match)\r\nFilename: {1}", _bestMatch, _bestMatchFilename);
-            }
-            else
-            {
-                txtOutput.Text = string.Format("Best match: {0}\r\nFilename: {1}", _bestMatch, _bestMatchFilename);
+                pictureBox1.Image = new Bitmap(_bestMatchFilename);
+                if (_bestMatch > 9 && _bestMatch < 17)
+                {
+                    txtOutput.Text = string.Format("Best match: {0} (shaky match)\r\nFilename: {1}", _bestMatch, _bestMatchFilename);
+                }
+                else if (_bestMatch >= 17)
+                {
+                    txtOutput.Text = string.Format("Best match: {0} (crap match)\r\nFilename: {1}", _bestMatch, _bestMatchFilename);
+                }
+                else
+                {
+                    txtOutput.Text = string.Format("Best match: {0}\r\nFilename: {1}", _bestMatch, _bestMatchFilename);
+                }
             }
         }
 
@@ -295,6 +332,21 @@ namespace MCR
                 
                 card.Save("temp.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
                 txtOutput.Text += f + "|" + Phash.ImageHash("temp.jpg") + "\r\n";
+            }
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            capture.FrameEvent2 += capture_FrameEvent2;
+
+            //Bitmap full = GetCard(new Bitmap(txtFilename.Text));
+            Bitmap full = GetCard(webcamBitmap);
+
+            if (full != null)
+            {
+                picFull.Image = full;
+
+                full.Save("temp.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
             }
         }
     }
