@@ -14,3 +14,12 @@ C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\obj\x86\Release\MC
 C:\Users\Bruger\documents\visual studio 2010\Projects\MCR\MCR\obj\x86\Release\MCR.pdb
 C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Release\test2.jpg
 C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Release\test3.jpg
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Release\jpeg62.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Release\libpng12.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Release\m14hashes.txt
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Release\pHash.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Release\zlib1.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Release\DirectX.Capture.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Release\DShowNET.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Release\DirectX.Capture.xml
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\obj\x86\Release\MCR.csprojResolveAssemblyReference.cache

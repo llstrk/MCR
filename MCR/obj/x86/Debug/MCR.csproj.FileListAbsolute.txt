@@ -45,3 +45,6 @@ C:\Users\dry\Documents\GitHub\MCR\MCR\obj\x86\Debug\MCR.csproj.GenerateResource.
 C:\Users\dry\Documents\GitHub\MCR\MCR\bin\Debug\DirectX.Capture.dll
 C:\Users\dry\Documents\GitHub\MCR\MCR\bin\Debug\DShowNET.dll
 C:\Users\dry\Documents\GitHub\MCR\MCR\bin\Debug\DirectX.Capture.xml
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\DirectX.Capture.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\DShowNET.dll
+C:\Users\Bruger\Documents\Visual Studio 2010\Projects\MCR\MCR\bin\Debug\DirectX.Capture.xml

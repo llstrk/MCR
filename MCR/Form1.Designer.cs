@@ -134,7 +134,7 @@
             this.txtThreshold.Name = "txtThreshold";
             this.txtThreshold.Size = new System.Drawing.Size(43, 20);
             this.txtThreshold.TabIndex = 9;
-            this.txtThreshold.Text = "50";
+            this.txtThreshold.Text = "0";
             // 
             // txtOutput
             // 

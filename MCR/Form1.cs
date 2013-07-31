@@ -33,8 +33,8 @@ namespace MCR
             capture = new DirectX.Capture.Capture(cameraFilters.VideoInputDevices[1], null);
             capture.FrameSize = new Size(640,480);
             capture.PreviewWindow = picPreview;
-            capture.FrameEvent2 += capture_FrameEvent2;
-            capture.GrapImg();
+            //capture.FrameEvent2 += capture_FrameEvent2;
+            //capture.GrapImg();
             
         }
 
@@ -42,7 +42,6 @@ namespace MCR
         {
             webcamBitmap = (Bitmap)e.Clone();
 
-            //Bitmap full = GetCard(new Bitmap(txtFilename.Text));
             Bitmap full = GetCard(webcamBitmap);
 
             if (full != null)
@@ -71,7 +70,7 @@ namespace MCR
 
         string[] m14hashes = File.ReadAllLines(@"m14hashes.txt");
 
-        private List<IntPoint> DetectQuad(Bitmap sourceBitmap)
+        private List<IntPoint> DetectQuad(Bitmap sourceBitmap, int threshold)
         {
             filtered = Grayscale.CommonAlgorithms.BT709.Apply(sourceBitmap);
             BlobCounter bc = new BlobCounter();
@@ -80,7 +79,7 @@ namespace MCR
             edgeFilter.ApplyInPlace(filtered);
 
             // Threshhold filter
-            Threshold threshholdFilter = new Threshold(int.Parse(txtThreshold.Text));
+            Threshold threshholdFilter = new Threshold(threshold);
             threshholdFilter.ApplyInPlace(filtered);
 
             bc.ProcessImage(filtered);
@@ -117,6 +116,9 @@ namespace MCR
                             {
                                 continue;
                             }
+                            else
+                            {
+                            }
 
                             // Flip card if it's the wrong way
                             if (chkWidth > chkHeight)
@@ -134,9 +136,151 @@ namespace MCR
             return null;
         }
 
+        // Simple chceks to find the best possible quads
+        private int CheckQuad(Bitmap sourceBitmap, List<IntPoint> corners)
+        {
+            if (corners == null || corners.Count != 4)
+            {
+                return 999;
+            }
+
+            int match = 0;
+            double correctCardRatio = 0.716;
+
+            float w1 = corners[0].DistanceTo(corners[1]);
+            float w2 = corners[2].DistanceTo(corners[3]);
+            float h1 = corners[0].DistanceTo(corners[3]);
+            float h2 = corners[1].DistanceTo(corners[2]);
+
+            double cardRatio1 = w1 / h1;
+            double cardRatio2 = w2 / h2;
+            double cardRatio = (cardRatio1 + cardRatio2) / 2;
+
+            IntPoint d1 = corners[1] - corners[0];
+            IntPoint d2 = corners[2] - corners[3];
+            IntPoint d3 = corners[3] - corners[0];
+            IntPoint d4 = corners[2] - corners[1];
+            IntPoint median = corners[2] - corners[0];
+
+            double x1Diff = corners[0].X - corners[3].X;
+            double x2Diff = corners[1].X - corners[2].X;
+            double y1Diff = corners[0].Y - corners[1].Y;
+            double y2Diff = corners[2].Y - corners[3].Y;
+
+            if (x1Diff < 0) { x1Diff = x1Diff * -1; }
+            if (x2Diff < 0) { x2Diff = x2Diff * -1; }
+            if (y1Diff < 0) { y1Diff = y1Diff * -1; }
+            if (y2Diff < 0) { y2Diff = y2Diff * -1; }
+
+            double topDrop = ((double)d1.Y + 1) / ((double)d1.X + 1);
+            double bottomDrop = ((double)d2.Y + 1) / ((double)d2.X + 1);
+            double leftDrop = ((double)d3.Y + 1) / ((double)d3.X + 1);
+            double rightDrop = ((double)d4.Y + 1) / ((double)d4.X + 1);
+
+            // Card ratio must be very close
+            if (cardRatio > correctCardRatio + 0.1 || cardRatio < correctCardRatio - 0.1)
+            {
+                match += 10;
+            }
+            if (cardRatio > correctCardRatio + 0.15 || cardRatio < correctCardRatio - 0.15)
+            {
+                match += 20;
+            }
+
+            // Card shouldn't be close to the borders
+            if (w1 >= sourceBitmap.Width - 100 || w2 >= sourceBitmap.Width - 100)
+            {
+                match += 10;
+            }
+            if (h1 >= sourceBitmap.Height - 50 || h2 >= sourceBitmap.Height - 50)
+            {
+                match += 10;
+            }
+
+            // The difference betweem x and y coordinates should be close to each other
+            if (x1Diff >= x2Diff + 15 || x1Diff <= x2Diff - 15)
+            {
+                match += 8;
+            }
+            if (y1Diff >= y2Diff + 15 || y1Diff <= y2Diff - 15)
+            {
+                match += 8;
+            }
+
+            // The drop between top and bottom should never go in different directions
+            if (d1.Y > 0 && d2.Y < 0)
+            {
+                match += 20;
+            }
+
+            // The drop between the top left corner and top right corner, should be fairly close to the drop between the bottom left and right corner
+            if (topDrop > bottomDrop + 0.05 || topDrop < bottomDrop - 0.05)
+            {
+                match += 10;
+            }
+            // The drop between the top left and bottom right corner, should be fairly close to each other, IF the length between top left and top right corner is less than between bottom left and right corner
+            if (leftDrop > rightDrop + 0.05 || leftDrop < rightDrop - 0.05)
+            {
+                if (w1 >= w2)
+                {
+                    match += 20;
+                }
+            }
+
+            // Cards should be either horizontal or vertical
+            if (median.Y < 150 && median.Y > -150)
+            {
+                match += 10;
+            }
+
+
+            return match;
+        }
+
         private Bitmap GetCard(Bitmap sourceBitmap)
         {
-            List<IntPoint> corners = DetectQuad(sourceBitmap);
+            int threshold = 0;
+            int.TryParse(txtThreshold.Text, out threshold);
+            int bestMatch = 999;
+            int bestMatchThreshold = 0;
+            List<IntPoint> bestMatchCorners = null;
+
+            List<IntPoint> corners = DetectQuad(sourceBitmap, threshold);
+
+            if (threshold != 0)
+            {
+                corners = DetectQuad(sourceBitmap, threshold);
+                int result = CheckQuad(sourceBitmap, corners);
+                txtOutput.Text += "Match is " + result + "\r\n";
+            }
+            else
+            {
+                threshold = 210;
+                while (threshold > 10)
+                {
+                    threshold -= 10;
+                    corners = DetectQuad(sourceBitmap, threshold);
+                    int result = CheckQuad(sourceBitmap, corners);
+                    if (result < bestMatch)
+                    {
+                        txtOutput.Text += "Image found with threshold " + threshold + "\r\n";
+                        bestMatch = result;
+                        bestMatchCorners = corners;
+                        bestMatchThreshold = threshold;
+                        if (result <= 20)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (bestMatchCorners != null)
+            {
+                corners = DetectQuad(sourceBitmap, bestMatchThreshold);
+                txtOutput.Text += "Best threshold is " + bestMatchThreshold + "\r\n";
+                txtOutput.Text += "Best match is " + bestMatch + "\r\n";
+            }
 
             // Hack to show what was detected
             try
@@ -197,8 +341,7 @@ namespace MCR
             picArt.Image = null;
             picFull.Image = null;
 
-            //Bitmap full = GetCard(new Bitmap(txtFilename.Text));
-            Bitmap full = GetCard(new Bitmap(webcamBitmap));
+            Bitmap full = GetCard(new Bitmap(txtFilename.Text));
 
             if (full != null)
             {
@@ -339,7 +482,6 @@ namespace MCR
         {
             capture.FrameEvent2 += capture_FrameEvent2;
 
-            //Bitmap full = GetCard(new Bitmap(txtFilename.Text));
             Bitmap full = GetCard(webcamBitmap);
 
             if (full != null)
