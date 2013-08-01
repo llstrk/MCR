@@ -33,21 +33,28 @@ namespace MCR
             capture = new DirectX.Capture.Capture(cameraFilters.VideoInputDevices[1], null);
             capture.FrameSize = new Size(640,480);
             capture.PreviewWindow = picPreview;
-            //capture.FrameEvent2 += capture_FrameEvent2;
-            //capture.GrapImg();
+            capture.FrameEvent2 += capture_FrameEvent2;
+            capture.GrapImg();
             
         }
 
         private void capture_FrameEvent2(Bitmap e)
         {
-            webcamBitmap = (Bitmap)e.Clone();
+            Bitmap full = null;
 
-            Bitmap full = GetCard(webcamBitmap);
-
-            if (full != null)
+            lock (doTempImg)
             {
-                lock (doTempImg)
+                webcamBitmap = (Bitmap)e.Clone();
+
+                try
                 {
+                    full = GetCard(webcamBitmap);
+                }
+                catch { }
+
+                if (full != null)
+                {
+
                     try
                     {
                         full.Save("temp.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
@@ -65,6 +72,7 @@ namespace MCR
         Graphics g;
         Bitmap filtered;
         Bitmap bm;
+        int lastResult;
         private DirectX.Capture.Capture capture = null;
         private Filters cameraFilters = new Filters();
 
@@ -263,12 +271,13 @@ namespace MCR
                     int result = CheckQuad(sourceBitmap, corners);
                     if (result < bestMatch)
                     {
-                        txtOutput.Text += "Image found with threshold " + threshold + "\r\n";
+                        //txtOutput.Text += "Image found with threshold " + threshold + "\r\n";
                         bestMatch = result;
                         bestMatchCorners = corners;
                         bestMatchThreshold = threshold;
                         if (result <= 20)
                         {
+                            capture.FrameEvent2 -= capture_FrameEvent2;
                             break;
                         }
                     }
@@ -278,8 +287,8 @@ namespace MCR
             if (bestMatchCorners != null)
             {
                 corners = DetectQuad(sourceBitmap, bestMatchThreshold);
-                txtOutput.Text += "Best threshold is " + bestMatchThreshold + "\r\n";
-                txtOutput.Text += "Best match is " + bestMatch + "\r\n";
+                //txtOutput.Text += "Best threshold is " + bestMatchThreshold + "\r\n";
+                //txtOutput.Text += "Best match is " + bestMatch + "\r\n";
             }
 
             // Hack to show what was detected
